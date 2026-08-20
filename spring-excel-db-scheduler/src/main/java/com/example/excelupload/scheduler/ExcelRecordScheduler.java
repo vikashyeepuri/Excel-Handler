@@ -3,11 +3,13 @@ package com.example.excelupload.scheduler;
 import com.example.excelupload.entity.ExcelRecord;
 import com.example.excelupload.repository.ExcelRecordRepository;
 import com.example.excelupload.service.ExternalApiService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @Component
 public class ExcelRecordScheduler {
     private final ExcelRecordRepository repository;
@@ -18,12 +20,14 @@ public class ExcelRecordScheduler {
         this.externalApiService = externalApiService;
     }
 
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(fixedDelay = 1000 * 15)
     public void processPendingRecords() {
         List<ExcelRecord> pending = repository.findByStatus("PENDING");
 
         for (ExcelRecord record : pending) {
             try {
+                log.info("Making an external call for pending record with ID: {}", record.getId());
+
                 //TODO : external API Info to be added, As of now marking everything as processed based on the db status
                 //externalApiService.callExternalApi(record);
                 record.setStatus("PROCESSED");

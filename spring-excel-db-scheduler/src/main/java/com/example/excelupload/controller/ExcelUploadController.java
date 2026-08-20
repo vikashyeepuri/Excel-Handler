@@ -3,6 +3,7 @@ package com.example.excelupload.controller;
 import com.example.excelupload.entity.ExcelRecord;
 import com.example.excelupload.repository.ExcelRecordRepository;
 import com.example.excelupload.service.ExcelService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/excel")
 public class ExcelUploadController {
@@ -26,9 +28,12 @@ public class ExcelUploadController {
 
     @PostMapping("/upload")
     public ResponseEntity<Map<String, Object>> uploadExcel(
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("traceId") String traceId) {
 
-        int count = excelService.readAndSave(file);
+        log.info("Request ID:{}, File name:{}", traceId, file.getOriginalFilename());
+
+        int count = excelService.readAndSave(file, traceId);
 
         return ResponseEntity.ok(Map.of(
                 "message", "Excel processed successfully",

@@ -1,0 +1,20 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: Excel-DB-Scheduler
+
+  datasource:
+    url: jdbc:oracle:thin:@192.168.1.56:1521:xe
+    username: ${username}
+    password: ${password}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+external:
+  api:
+    url: https://YOUR-EXTERNAL-API-URL-HERE
