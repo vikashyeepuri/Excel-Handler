@@ -9,8 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,20 +33,27 @@ public class ExcelService {
                 return 0;
             }
 
-            List<ExcelRecord> records = new ArrayList<>();
+            List<ExcelRecord> parsedRecords = new ArrayList<>();
+            Set<String> debitRefNos = new HashSet<>(); // Used to batch-fetch existing records
 
             for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
                 Row row = sheet.getRow(rowIndex);
 
                 if (row == null) {
                     log.info("Row number: {} is Empty",  rowIndex);
+                    continue; // Added continue to prevent NullPointerException below
+                }
+
+                String debitRefNo = getCellValue(row.getCell(2));
+                if (debitRefNo != null && !debitRefNo.trim().isEmpty()) {
+                    debitRefNos.add(debitRefNo);
                 }
 
                 ExcelRecord record = ExcelRecord.builder()
-                        .id(null)
+                        // Leave ID null for now; we will set it below if the record exists
                         .batchTransactionId(getCellValue(row.getCell(0)))
                         .productId(getCellValue(row.getCell(1)))
-                        .debitRefNo(getCellValue(row.getCell(2)))
+                        .debitRefNo(debitRefNo)
                         .debitAccountNo(getCellValue(row.getCell(3)))
                         .transferBranch(getCellValue(row.getCell(4)))
                         .debitCurrency(getCellValue(row.getCell(5)))
@@ -80,14 +87,37 @@ public class ExcelService {
                         .status("PENDING")
                         .build();
 
-                records.add(record);
+                parsedRecords.add(record);
             }
 
-            repository.saveAll(records);
-            return records.size();
+            // --- UPSERT LOGIC ---
+            if (!debitRefNos.isEmpty()) {
+
+                // Fetch all the records that already exist in our database with those debitRefNos
+                List<ExcelRecord> existingRecords = repository.findByDebitRefNoIn(debitRefNos);
+
+                // Create a Map
+                // If the debitRefNo exists in DB {"someDebitRefNo" : "somRecordId"}
+                // If not {"someDebitRefNo" : null}
+                Map<String, Long> existingIdMap = existingRecords.stream()
+                        .collect(Collectors.toMap(ExcelRecord::getDebitRefNo, ExcelRecord::getId));
+
+                // If any record already exists in the database then update the ID
+                for (ExcelRecord record : parsedRecords) {
+                    Long existingId = existingIdMap.get(record.getDebitRefNo());
+                    if (existingId != null) {
+                        record.setId(existingId);
+                    }
+                }
+            }
+
+            // Spring Data JPA checks the ID: if present, it updates; if null, it inserts.
+            repository.saveAll(parsedRecords);
+
+            return parsedRecords.size();
 
         } catch (Exception e) {
-            log.error("Request ID: {}, unable to read and save excel file", traceId);
+            log.error("Request ID: {}, unable to read and save excel file", traceId, e);
             throw new RuntimeException("Request ID: " + traceId + " Unable to read and save Excel file", e);
         }
     }

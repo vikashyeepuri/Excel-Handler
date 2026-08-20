@@ -27,7 +27,7 @@ public class ExcelRecord {
     @Column(name = "product_id")
     private String productId;
 
-    @Column(name = "debit_ref_no")
+    @Column(name = "debit_ref_no", unique = true)
     private String debitRefNo;
 
     @Column(name = "debit_account_no")
