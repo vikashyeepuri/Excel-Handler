@@ -17,7 +17,7 @@ public class ExternalApiService {
     }
 
     public String callExternalApi(Object request) {
-        // Replace request/response handling with your real API contract.
+
         return restClient.post()
                 .uri(externalApiUrl)
                 .body(request)

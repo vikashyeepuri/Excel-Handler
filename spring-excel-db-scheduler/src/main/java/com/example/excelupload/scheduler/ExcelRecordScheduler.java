@@ -13,20 +13,19 @@ public class ExcelRecordScheduler {
     private final ExcelRecordRepository repository;
     private final ExternalApiService externalApiService;
 
-    public ExcelRecordScheduler(
-            ExcelRecordRepository repository,
-            ExternalApiService externalApiService) {
+    public ExcelRecordScheduler(ExcelRecordRepository repository, ExternalApiService externalApiService) {
         this.repository = repository;
         this.externalApiService = externalApiService;
     }
 
-    @Scheduled(fixedDelayString = "${excel.scheduler.fixed-delay-ms}")
+    @Scheduled(cron = "0 */1 * * * *")
     public void processPendingRecords() {
         List<ExcelRecord> pending = repository.findByStatus("PENDING");
 
         for (ExcelRecord record : pending) {
             try {
-                externalApiService.callExternalApi(record);
+                //TODO : external API Info to be added, As of now marking everything as processed based on the db status
+                //externalApiService.callExternalApi(record);
                 record.setStatus("PROCESSED");
                 repository.save(record);
             } catch (Exception e) {

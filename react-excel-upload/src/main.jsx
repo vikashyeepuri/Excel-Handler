@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
-const API_URL = 'http://localhost:8080/api/excel';
+const API_URL = 'http://192.168.1.74:8080/api/excel';
 const UPLOAD_URL = `${API_URL}/upload`;
 
 function App() {
