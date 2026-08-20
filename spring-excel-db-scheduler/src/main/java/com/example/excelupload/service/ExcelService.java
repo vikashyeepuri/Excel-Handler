@@ -36,9 +36,9 @@ public class ExcelService {
                 ExcelRecord record = new ExcelRecord();
 
                 // Change these mappings for your real Excel/entity.
-                record.setName(getCellValue(row.getCell(0)));
-                record.setAge(getCellValue(row.getCell(1)));
-                record.setCity(getCellValue(row.getCell(2)));
+                record.setBatchTransactionId(getCellValue(row.getCell(0)));
+                record.setBenAddr1(getCellValue(row.getCell(1)));
+                record.setBenAddr2(getCellValue(row.getCell(2)));
                 record.setStatus("PENDING");
 
                 records.add(record);
