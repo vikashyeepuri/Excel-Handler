@@ -1,5 +1,7 @@
 package com.example.excelupload.scheduler;
 
+import com.example.excelupload.dto.RequestDto;
+import com.example.excelupload.dto.ResponseDto;
 import com.example.excelupload.entity.ExcelRecord;
 import com.example.excelupload.repository.ExcelRecordRepository;
 import com.example.excelupload.service.ExternalApiService;
@@ -28,10 +30,69 @@ public class ExcelRecordScheduler {
             try {
                 log.info("Making an external call for pending record with ID: {}", record.getId());
 
-                //TODO : external API Info to be added, As of now marking everything as processed based on the db status
-                //externalApiService.callExternalApi(record);
-                record.setStatus("PROCESSED");
+                RequestDto requestDto = RequestDto.builder()
+                        .productCode("")
+                        .postingBranch("")
+                        .exchangeRate("")
+                        .dealNo("")
+                        .dealDate("")
+                        .dealReq("")
+                        .xReferenceNo("")
+                        .debitAccountNo(null)
+                        .debitAccountBranch("")
+                        .debitAmount(null)
+                        .debitCurrency("")
+                        .byOrder1("")
+                        .byOrder2("")
+                        .byOrder3("")
+                        .byOrder4("")
+                        .byOrder5("")
+                        .chargeAccountNo("")
+                        .creditAccountNo("")
+                        .creditAccountBranch("")
+                        .creditAmount(null)
+                        .creditCurrency("")
+                        .debitDate("")
+                        .creditDate("")
+                        .authStatus("")
+                        .chargeBearer("")
+                        .paymentDetails1("")
+                        .paymentDetails2("")
+                        .paymentDetails3("")
+                        .paymentDetails4("")
+                        .ultimateBeneficiary1("")
+                        .ultimateBeneficiary2("")
+                        .ultimateBeneficiary3("")
+                        .ultimateBeneficiary4("")
+                        .ultimateBeneficiary5("")
+                        .acwthInst1("")
+                        .acwthInst2("")
+                        .acwthInst3("")
+                        .acwthInst4("")
+                        .acwthInst5("")
+                        .receiver("")
+                        .remarks("")
+                        .orginalTranRef("")
+                        .compositeMis1("")
+                        .compositeMis2("")
+                        .compositeMis3("")
+                        .compositeMis4("")
+                        .transactionMis1("")
+                        .transactionMis2("")
+                        .relatedAccount("")
+                        .misDetails(null)
+                        .contractMasterCustom(null)
+                        .settlementAddlDetails(null)
+                        .settlementAddlMain(null)
+                        .chargeDetails(null)
+                        .udfDetails(null)
+                        .build();
+
+                ResponseDto responseDto = externalApiService.callExternalApi(requestDto);
+                log.info("External API Response: {}", responseDto);
+                if(responseDto.getStatus().equals("Success")){ record.setStatus("PROCESSED"); }
                 repository.save(record);
+
             } catch (Exception e) {
                 // Leave as PENDING so the next scheduler run can retry it.
                 System.err.println("Failed record " + record.getId() + ": " + e.getMessage());
