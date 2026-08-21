@@ -62,22 +62,23 @@ const ExcelUploader = () => {
 
     const formData = new FormData();
     formData.append('file', selectedFile); 
-    formData.append('traceId', crypto.randomUUID().substring(0, 8));
 
     const toastId = toast.loading('Uploading...');
 
     try {
       setIsUploading(true);
-      const response = await fetch('http://192.168.1.56:8090/api/excel/upload', {
+      const response = await fetch('http://localhost:8090/api/excel/upload', {
         method: 'POST',
         body: formData,
       });
 
       if (response.ok) {
         toast.success('File uploaded successfully!', { id: toastId });
-        // handleRemoveFile(); // Uncomment if you want to clear table on success
+        handleRemoveFile(); 
       } else {
-        toast.error(`Upload failed. Server responded with status: ${response.status}`, { id: toastId });
+        const responseJson = await response.json();
+        toast.error(`Upload failed. Server responded with status: ${response.status}, Message : ${responseJson.message}`, { id: toastId });
+        console.error("Upload failed:", responseJson);
       }
     } catch (error) {
       console.error('Upload Error:', error);

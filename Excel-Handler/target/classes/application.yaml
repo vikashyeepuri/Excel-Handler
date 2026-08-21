@@ -1,0 +1,33 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: Excel-DB-Scheduler
+
+  datasource:
+    url: jdbc:oracle:thin:@192.168.1.56:1521:xe
+    username: ${username}
+    password: ${password}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+external:
+  api:
+    url: https://YOUR-EXTERNAL-API-URL-HERE
+
+logging:
+  level:
+    root: INFO # DEBUG and TRACE will be ignored
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId}] {%thread} %-5p %c{1}:%L - %m%n"
+  file:
+    max-history: 100 # Archived files are kept for 100 days before getting deleted
+    name: /logs/excel-handler-service.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: /logs/excel-handler-service-%d{yyyy-MM-dd}.%i.log
+      # This is how archived files are named when a new day starts or file size reaches it's limits
