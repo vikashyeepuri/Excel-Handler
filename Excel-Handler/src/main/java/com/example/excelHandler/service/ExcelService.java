@@ -28,7 +28,7 @@ public class ExcelService {
         validateFile(file);
 
         try (InputStream inputStream = file.getInputStream();
-             Workbook workbook = WorkbookFactory.create(inputStream)) {
+                Workbook workbook = WorkbookFactory.create(inputStream)) {
 
             Sheet sheet = workbook.getSheetAt(0);
             if (sheet.getRow(0) == null) {
@@ -43,7 +43,7 @@ public class ExcelService {
                 Row row = sheet.getRow(rowIndex);
 
                 if (row == null) {
-                    log.info("Row number: {} is Empty",  rowIndex);
+                    log.info("Row number: {} is Empty", rowIndex);
                     continue; // Added continue to prevent NullPointerException below
                 }
 
@@ -96,7 +96,8 @@ public class ExcelService {
             // --- UPSERT LOGIC ---
             if (!debitRefNos.isEmpty()) {
 
-                // Fetch all the records that already exist in our database with those debitRefNos
+                // Fetch all the records that already exist in our database with those
+                // debitRefNos
                 List<ExcelRecord> existingRecords = repository.findByDebitRefNoIn(debitRefNos);
 
                 // Create a Map
@@ -121,14 +122,26 @@ public class ExcelService {
                     new SuccessResponseDto<>(
                             "SUCCESS",
                             "Excel sheet has been processed successfully",
-                            parsedRecords.size()
-                    ), HttpStatus.CREATED
-            );
+                            parsedRecords.size()),
+                    HttpStatus.CREATED);
 
         } catch (Exception e) {
             log.error("Unable to read and save excel file, message: {}", e.getMessage());
             throw new RuntimeException("Unable to read and save Excel file, reason: " + e.getMessage());
         }
+    }
+
+    public ResponseEntity<SuccessResponseDto<List<ExcelRecord>>> getAllRecords() {
+
+        List<ExcelRecord> records = repository.findAll();
+
+        return new ResponseEntity<>(
+                new SuccessResponseDto<>(
+                        "SUCCESS",
+                        "Retrived All records Successfully",
+                        records),
+                HttpStatus.OK);
+
     }
 
     private void validateFile(MultipartFile file) {
@@ -139,7 +152,7 @@ public class ExcelService {
         String name = file.getOriginalFilename();
         if (name == null ||
                 !(name.toLowerCase().endsWith(".xlsx") ||
-                  name.toLowerCase().endsWith(".xls"))) {
+                        name.toLowerCase().endsWith(".xls"))) {
             throw new IllegalArgumentException("Only Excel files are allowed");
         }
     }
@@ -149,9 +162,13 @@ public class ExcelService {
     }
 
     private BigDecimal getBigDecimalValue(Cell cell) {
-        if (cell == null) { return null; }
+        if (cell == null) {
+            return null;
+        }
         String value = new DataFormatter().formatCellValue(cell).trim();
-        if (value.isEmpty()) { return null; }
+        if (value.isEmpty()) {
+            return null;
+        }
         return new BigDecimal(value);
     }
 }

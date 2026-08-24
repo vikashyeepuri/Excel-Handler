@@ -1,11 +1,9 @@
 package com.example.excelHandler.controller;
 
 import com.example.excelHandler.entity.ExcelRecord;
-import com.example.excelHandler.repository.ExcelRecordRepository;
 import com.example.excelHandler.response.SuccessResponseDto;
 import com.example.excelHandler.service.ExcelService;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,13 +15,10 @@ import java.util.List;
 @RequestMapping("/api/excel")
 public class ExcelUploadController {
     private final ExcelService excelService;
-    private final ExcelRecordRepository excelRecordRepository;
 
     public ExcelUploadController(
-            ExcelService excelService,
-            ExcelRecordRepository excelRecordRepository) {
+            ExcelService excelService) {
         this.excelService = excelService;
-        this.excelRecordRepository = excelRecordRepository;
     }
 
     @PostMapping("/upload")
@@ -34,10 +29,10 @@ public class ExcelUploadController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExcelRecord>> getAllRecords() {
+    public ResponseEntity<SuccessResponseDto<List<ExcelRecord>>> getAllRecords() {
 
-        List<ExcelRecord> records = excelRecordRepository.findAll();
+        log.info("Fetching All existing records...");
 
-        return ResponseEntity.ok(records);
+        return excelService.getAllRecords();
     }
 }
